@@ -13,6 +13,11 @@ public class server {
     static BufferedReader bufferedReader = null;
     static BufferedWriter bufferedWriter = null;
 
+    static InputStreamReader lanInputStreamReader = null;
+    static OutputStreamWriter lanOutputStreamWriter = null;
+    static BufferedReader lanBufferedReader = null;
+    static BufferedWriter lanBufferedWriter = null;
+
     private static long power(long a, long b, long p) {
         if (b == 1)
             return a;
@@ -53,15 +58,14 @@ public class server {
         bufferedWriter = new BufferedWriter(outputStreamWriter);
 
         SetKeys();
-
         ConnectLan();
 
         while (true) {
             String msgFromClient = bufferedReader.readLine();
-            System.out.println("Received message from " + socket.getRemoteSocketAddress() + ": " + msgFromClient);
-            bufferedWriter.write("received");
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
+            System.out.println("Received message from " + msgFromClient);
+            lanBufferedWriter.write(msgFromClient);
+            lanBufferedWriter.newLine();
+            lanBufferedWriter.flush();
         }
     }
 
@@ -80,10 +84,22 @@ public class server {
     }
 
     public static void ConnectLan() throws IOException {
-        String keyFromClient = bufferedReader.readLine();
+        String infoFromClient = bufferedReader.readLine();
         bufferedWriter.newLine();
         bufferedWriter.flush();
+        bufferedWriter.write("enter IP Address and port number");
+        String[] connectionInfo = infoFromClient.split(",");
+        String IP = connectionInfo[0];
+        int portNo = Integer.parseInt(connectionInfo[1]);
 
+        Socket lanSocket = new Socket(IP,portNo);
+
+        lanInputStreamReader = new InputStreamReader(lanSocket.getInputStream());
+        lanOutputStreamWriter = new OutputStreamWriter(lanSocket.getOutputStream());
+        lanBufferedReader = new BufferedReader(lanInputStreamReader);
+        lanBufferedWriter = new BufferedWriter(lanOutputStreamWriter);
+
+        System.out.println("connected to lan");
 
     }
 
