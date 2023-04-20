@@ -1,0 +1,85 @@
+import java.awt.*;
+import java.awt.event.*;
+import java.sql.*;
+
+import javax.swing.*;
+
+public class LoginApplication extends JFrame implements ActionListener {
+
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    private JButton loginButton;
+    private JButton newUserButton;
+
+    public LoginApplication() {
+        super("Login Application");
+
+        // Create the UI components
+        usernameField = new JTextField(20);
+        passwordField = new JPasswordField(20);
+        loginButton = new JButton("Login");
+        newUserButton = new JButton("Create New User");
+
+        // Add action listeners to the buttons
+        loginButton.addActionListener(this);
+        newUserButton.addActionListener(this);
+
+        // Create the main panel and add the components
+        JPanel mainPanel = new JPanel(new GridLayout(3, 2));
+        mainPanel.add(new JLabel("Username:"));
+        mainPanel.add(usernameField);
+        mainPanel.add(new JLabel("Password:"));
+        mainPanel.add(passwordField);
+        mainPanel.add(loginButton);
+        mainPanel.add(newUserButton);
+
+        // Add the main panel to the frame
+        getContentPane().add(mainPanel);
+
+        // Set the size and make the frame visible
+        setSize(600, 200);
+        setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        new LoginApplication();
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == loginButton) {
+            // Retrieve the entered username and password
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+
+            // Query the database for the user
+            try {
+                Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydatabase", "root", "");
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE username='" + username + "' AND password='" + password + "'");
+                if (rs.next()) {
+                    JOptionPane.showMessageDialog(this, "Login successful");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Invalid username or password");
+                }
+                conn.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } else if (e.getSource() == newUserButton) {
+            // Retrieve the entered username and password
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+
+            // Insert the user into the database
+            try {
+                Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydatabase", "root", "");
+                Statement stmt = conn.createStatement();
+                stmt.executeUpdate("INSERT INTO users (username, password) VALUES ('" + username + "', '" + password + "')");
+                JOptionPane.showMessageDialog(this, "User created successfully");
+                conn.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+}
